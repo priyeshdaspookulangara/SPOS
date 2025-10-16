@@ -46,7 +46,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-// Apply migrations
+// Apply migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -54,11 +54,22 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
+        // Seed Chart of Accounts
+        if (!context.ChartOfAccounts.Any())
+        {
+            context.ChartOfAccounts.AddRange(
+                new Core.Entities.ChartOfAccounts { AccountNumber = "120000", Description = "Accounts Receivable", AccountType = "Asset" },
+                new Core.Entities.ChartOfAccounts { AccountNumber = "400000", Description = "Sales Revenue", AccountType = "Revenue" },
+                new Core.Entities.ChartOfAccounts { AccountNumber = "140000", Description = "Inventory", AccountType = "Asset" },
+                new Core.Entities.ChartOfAccounts { AccountNumber = "199999", Description = "GR/IR Clearing", AccountType = "Liability" }
+            );
+            context.SaveChanges();
+        }
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating the database.");
+        logger.LogError(ex, "An error occurred while migrating or seeding the database.");
     }
 }
 

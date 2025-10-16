@@ -153,6 +153,19 @@ namespace Web.Controllers
 
             _context.StockLedger.Add(newStockLedgerEntry);
 
+            // Financial Posting
+            var inventoryAccount = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "140000"); // Inventory
+            var grirAccount = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "199999"); // GR/IR Clearing
+
+            if (inventoryAccount != null && grirAccount != null)
+            {
+                var amount = quantity * purchaseOrder.UnitPrice;
+                // Debit Inventory
+                _context.GlEntries.Add(new GlEntry { AccountId = inventoryAccount.Id, Amount = amount, PostingDate = DateTime.Now, DocumentType = "WE", Description = $"Goods Receipt for PO {purchaseOrder.Id}" });
+                // Credit GR/IR
+                _context.GlEntries.Add(new GlEntry { AccountId = grirAccount.Id, Amount = -amount, PostingDate = DateTime.Now, DocumentType = "WE", Description = $"GR/IR for PO {purchaseOrder.Id}" });
+            }
+
             purchaseOrder.Status = "Closed";
             _context.Update(purchaseOrder);
 

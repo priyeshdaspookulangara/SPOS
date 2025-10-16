@@ -26,4 +26,11 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
     public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
     public DbSet<StockLedger> StockLedger { get; set; }
+
+    // Fina & SD Entities
+    public DbSet<GlEntry> GlEntries { get; set; }
+    public DbSet<SalesOrder> SalesOrders { get; set; }
+    public DbSet<SalesOrderItem> SalesOrderItems { get; set; }
+    public DbSet<Delivery> Deliveries { get; set; }
+    public DbSet<BillingDocument> BillingDocuments { get; set; }
 }

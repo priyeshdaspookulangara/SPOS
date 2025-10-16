@@ -1,0 +1,51 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Trial Balance";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Account
+            </th>
+            <th class="text-end">
+                Debit
+            </th>
+            <th class="text-end">
+                Credit
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @item.Account.AccountNumber - @item.Account.Description
+            </td>
+            <td class="text-end">
+                @if (item.Balance > 0)
+                {
+                    @item.Balance.ToString("C")
+                }
+            </td>
+            <td class="text-end">
+                @if (item.Balance < 0)
+                {
+                    @(-item.Balance).ToString("C")
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td><strong>Total</strong></td>
+            <td class="text-end"><strong>@Model.Where(i => i.Balance > 0).Sum(i => i.Balance).ToString("C")</strong></td>
+            <td class="text-end"><strong>@(-Model.Where(i => i.Balance < 0).Sum(i => i.Balance)).ToString("C")</strong></td>
+        </tr>
+    </tfoot>
+</table>
