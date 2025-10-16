@@ -1,13 +1,9 @@
-@model Core.Entities.SalesOrder
-
 @{
-    ViewData["Title"] = "Create Sales Order";
+    ViewData["Title"] = "Point of Sale";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<h4>Sales Order</h4>
-<hr />
 <div class="row">
     <div class="col-md-8">
         <div class="card">
@@ -28,7 +24,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>&nbsp;</label>
-                            <button id="add-to-cart-btn" class="btn btn-primary w-100">Add to Order</button>
+                            <button id="add-to-cart-btn" class="btn btn-primary w-100">Add to Cart</button>
                         </div>
                     </div>
                 </div>
@@ -52,14 +48,14 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <div class="form-group">
-                    <label asp-for="CustomerId" class="control-label"></label>
-                    <select asp-for="CustomerId" class ="form-control" asp-items="ViewBag.CustomerId"></select>
-                </div>
-                <hr />
                 <h3 class="card-title">Total: <span id="total-amount">0.00</span></h3>
                 <hr />
-                <button id="create-order-btn" class="btn btn-success w-100">Create Order</button>
+                <div class="form-group">
+                    <label for="payment-method-select">Payment Method</label>
+                    <select id="payment-method-select" class="form-control" asp-items="ViewBag.PaymentMethodId"></select>
+                </div>
+                <hr />
+                <button id="complete-sale-btn" class="btn btn-success w-100">Complete Sale</button>
             </div>
         </div>
     </div>
@@ -73,8 +69,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const cartTableBody = document.querySelector('#cart-table tbody');
     const totalAmountSpan = document.getElementById('total-amount');
-    const createOrderBtn = document.getElementById('create-order-btn');
-    const customerSelect = document.getElementById('CustomerId');
+    const completeSaleBtn = document.getElementById('complete-sale-btn');
+    const paymentMethodSelect = document.getElementById('payment-method-select');
 
     let cart = [];
 
@@ -88,15 +84,23 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        const stockResponse = await fetch(`/Pos/CheckStock/${materialId}`);
+        const stockData = await stockResponse.json();
+
+        if (stockData.stock < quantity) {
+            alert(`Not enough stock for ${materialName}. Available: ${stockData.stock}`);
+            return;
+        }
+
         const priceResponse = await fetch(`/Pos/GetMaterialPrice/${materialId}`);
         const priceData = await priceResponse.json();
         const price = priceData.price;
 
         const cartItem = {
-            materialId: parseInt(materialId),
+            materialId: materialId,
             materialName: materialName,
             quantity: quantity,
-            unitPrice: price
+            price: price
         };
 
         cart.push(cartItem);
@@ -109,13 +113,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         cart.forEach((item, index) => {
             const row = document.createElement('tr');
-            const itemTotal = item.quantity * item.unitPrice;
+            const itemTotal = item.quantity * item.price;
             total += itemTotal;
 
             row.innerHTML = `
                 <td>${item.materialName}</td>
                 <td>${item.quantity}</td>
-                <td>${item.unitPrice.toFixed(2)}</td>
+                <td>${item.price.toFixed(2)}</td>
                 <td>${itemTotal.toFixed(2)}</td>
                 <td><button class="btn btn-danger btn-sm remove-item-btn" data-index="${index}">Remove</button></td>
             `;
@@ -133,32 +137,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    createOrderBtn.addEventListener('click', async function () {
+    completeSaleBtn.addEventListener('click', async function () {
         if (cart.length === 0) {
-            alert('Order is empty.');
+            alert('Cart is empty.');
             return;
         }
 
-        const customerId = customerSelect.value;
-        const salesOrderData = {
-            customerId: parseInt(customerId),
+        const paymentMethodId = paymentMethodSelect.value;
+        const transactionData = {
+            paymentMethodId: paymentMethodId,
             items: cart
         };
 
-        const response = await fetch('/Sd/CreateSalesOrder', {
+        const response = await fetch('/Pos/CompleteSale', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'RequestVerificationToken': getAntiForgeryToken()
             },
-            body: JSON.stringify(salesOrderData)
+            body: JSON.stringify(transactionData)
         });
 
         if (response.ok) {
-            window.location.href = '/Sd/SalesOrders';
+            alert('Sale completed successfully!');
+            cart = [];
+            renderCart();
         } else {
-            const error = await response.text();
-            alert('Error creating sales order: ' + error);
+            alert('Error completing sale.');
         }
     });
 

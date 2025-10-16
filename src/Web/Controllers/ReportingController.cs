@@ -48,5 +48,21 @@ namespace Web.Controllers
 
             return View(trialBalance);
         }
+
+        public async Task<IActionResult> ZReport()
+        {
+            var today = DateTime.Today;
+            var zReport = await _context.PosTransactions
+                .Where(t => t.TransactionDate.Date == today)
+                .Include(t => t.PaymentMethod)
+                .GroupBy(t => t.PaymentMethod.Name)
+                .Select(g => new {
+                    PaymentMethod = g.Key,
+                    Total = g.Sum(t => t.TotalAmount)
+                })
+                .ToListAsync();
+
+            return View(zReport);
+        }
     }
 }

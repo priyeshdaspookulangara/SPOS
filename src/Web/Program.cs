@@ -58,10 +58,19 @@ using (var scope = app.Services.CreateScope())
         if (!context.ChartOfAccounts.Any())
         {
             context.ChartOfAccounts.AddRange(
+                new Core.Entities.ChartOfAccounts { AccountNumber = "101000", Description = "Cash", AccountType = "Asset" },
                 new Core.Entities.ChartOfAccounts { AccountNumber = "120000", Description = "Accounts Receivable", AccountType = "Asset" },
                 new Core.Entities.ChartOfAccounts { AccountNumber = "400000", Description = "Sales Revenue", AccountType = "Revenue" },
                 new Core.Entities.ChartOfAccounts { AccountNumber = "140000", Description = "Inventory", AccountType = "Asset" },
                 new Core.Entities.ChartOfAccounts { AccountNumber = "199999", Description = "GR/IR Clearing", AccountType = "Liability" }
+            );
+            context.SaveChanges();
+        }
+        if (!context.PaymentMethods.Any())
+        {
+            var cashAccount = context.ChartOfAccounts.First(a => a.AccountNumber == "101000");
+            context.PaymentMethods.AddRange(
+                new Core.Entities.PaymentMethod { Name = "Cash", GlAccountId = cashAccount.Id }
             );
             context.SaveChanges();
         }

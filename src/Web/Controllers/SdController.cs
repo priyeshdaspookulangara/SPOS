@@ -41,37 +41,29 @@ namespace Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateSalesOrder(SalesOrder salesOrder, int MaterialId, int Quantity)
+        public async Task<IActionResult> CreateSalesOrder([FromBody] SalesOrder salesOrder)
         {
             if (ModelState.IsValid)
             {
-                var stockLevel = await _inventoryService.GetStockLevelAsync(MaterialId);
-                if (stockLevel < Quantity)
+                foreach (var item in salesOrder.Items)
                 {
-                    ModelState.AddModelError("", "Not enough stock available.");
-                    ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Name", salesOrder.CustomerId);
-                    ViewData["MaterialId"] = new SelectList(_context.Materials, "Id", "Description", MaterialId);
-                    return View(salesOrder);
+                    var stockLevel = await _inventoryService.GetStockLevelAsync(item.MaterialId);
+                    if (stockLevel < item.Quantity)
+                    {
+                        return BadRequest($"Not enough stock for material ID {item.MaterialId}. Available: {stockLevel}");
+                    }
+                    var material = await _context.Materials.FindAsync(item.MaterialId);
+                    item.UnitPrice = material.ListPrice;
                 }
 
-                var material = await _context.Materials.FindAsync(MaterialId);
-                var salesOrderItem = new SalesOrderItem
-                {
-                    MaterialId = MaterialId,
-                    Quantity = Quantity,
-                    UnitPrice = material.ListPrice
-                };
-                salesOrder.Items.Add(salesOrderItem);
-                salesOrder.TotalAmount = salesOrderItem.Quantity * salesOrderItem.UnitPrice;
+                salesOrder.TotalAmount = salesOrder.Items.Sum(i => i.Quantity * i.UnitPrice);
                 salesOrder.OrderDate = DateTime.Now;
 
                 _context.Add(salesOrder);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(SalesOrders));
+                return Ok();
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Name", salesOrder.CustomerId);
-            ViewData["MaterialId"] = new SelectList(_context.Materials, "Id", "Description", MaterialId);
-            return View(salesOrder);
+            return BadRequest(ModelState);
         }
 
         // Delivery Actions

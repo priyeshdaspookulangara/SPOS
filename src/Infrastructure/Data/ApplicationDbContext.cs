@@ -33,4 +33,9 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<SalesOrderItem> SalesOrderItems { get; set; }
     public DbSet<Delivery> Deliveries { get; set; }
     public DbSet<BillingDocument> BillingDocuments { get; set; }
+
+    // POS Entities
+    public DbSet<PosTransaction> PosTransactions { get; set; }
+    public DbSet<PosTransactionItem> PosTransactionItems { get; set; }
+    public DbSet<PaymentMethod> PaymentMethods { get; set; }
 }
