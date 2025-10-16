@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Workforce Management";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Select a category to manage:</p>
+
+<div class="list-group">
+    <a asp-action="Employees" class="list-group-item list-group-item-action">Employees</a>
+    <a asp-action="LeaveRequests" class="list-group-item list-group-item-action">Leave Requests</a>
+</div>
