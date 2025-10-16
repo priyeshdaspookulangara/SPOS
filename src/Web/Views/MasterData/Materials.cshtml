@@ -1,0 +1,53 @@
+@model IEnumerable<Core.Entities.Material>
+
+@{
+    ViewData["Title"] = "Materials";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="CreateMaterial" class="btn btn-primary">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UnitOfMeasure)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StandardCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ListPrice)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UnitOfMeasure)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StandardCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ListPrice)
+            </td>
+            <td>
+                <a asp-action="EditMaterial" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="DetailsMaterial" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="DeleteMaterial" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

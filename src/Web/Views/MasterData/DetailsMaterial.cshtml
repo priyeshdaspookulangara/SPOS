@@ -1,0 +1,42 @@
+@model Core.Entities.Material
+
+@{
+    ViewData["Title"] = "Material Details";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>Material</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UnitOfMeasure)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UnitOfMeasure)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.StandardCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.StandardCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ListPrice)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ListPrice)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="EditMaterial" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Materials">Back to List</a>
+</div>

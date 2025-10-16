@@ -1,0 +1,36 @@
+@model Core.Entities.ChartOfAccounts
+
+@{
+    ViewData["Title"] = "Chart of Accounts Details";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>Chart of Accounts</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.AccountNumber)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.AccountNumber)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.AccountType)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.AccountType)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="EditChartOfAccounts" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="ChartOfAccounts">Back to List</a>
+</div>
