@@ -48,6 +48,11 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
+                <div class="form-group">
+                    <label for="customer-select">Customer</label>
+                    <select id="customer-select" class="form-control" asp-items="ViewBag.CustomerId"></select>
+                </div>
+                <hr />
                 <h3 class="card-title">Total: <span id="total-amount">0.00</span></h3>
                 <hr />
                 <div class="form-group">
@@ -71,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const totalAmountSpan = document.getElementById('total-amount');
     const completeSaleBtn = document.getElementById('complete-sale-btn');
     const paymentMethodSelect = document.getElementById('payment-method-select');
+    const customerSelect = document.getElementById('customer-select');
 
     let cart = [];
 
@@ -144,12 +150,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const paymentMethodId = paymentMethodSelect.value;
+        const customerId = customerSelect.value;
         const transactionData = {
             paymentMethodId: paymentMethodId,
             items: cart
         };
 
-        const response = await fetch('/Pos/CompleteSale', {
+        const response = await fetch(`/Pos/CompleteSale?customerId=${customerId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

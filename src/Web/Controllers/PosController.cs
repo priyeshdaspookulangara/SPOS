@@ -25,6 +25,7 @@ namespace Web.Controllers
         {
             ViewData["MaterialId"] = new SelectList(_context.Materials, "Id", "Description");
             ViewData["PaymentMethodId"] = new SelectList(_context.PaymentMethods, "Id", "Name");
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Name");
             return View();
         }
 
@@ -45,7 +46,7 @@ namespace Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CompleteSale([FromBody] PosTransaction transaction)
+        public async Task<IActionResult> CompleteSale([FromBody] PosTransaction transaction, [FromQuery] int customerId)
         {
             if (ModelState.IsValid)
             {
@@ -62,6 +63,17 @@ namespace Web.Controllers
                     _context.GlEntries.Add(new GlEntry { AccountId = revenueAccount.Id, Amount = -transaction.TotalAmount, PostingDate = DateTime.Now, DocumentType = "DR", Description = $"POS Sale {transaction.Id}" });
                     _context.GlEntries.Add(new GlEntry { AccountId = paymentAccount.Id, Amount = transaction.TotalAmount, PostingDate = DateTime.Now, DocumentType = "DR", Description = $"POS Sale {transaction.Id}" });
                 }
+
+                var interaction = new InteractionHistory
+                {
+                    CustomerId = customerId,
+                    InteractionDate = DateTime.Now,
+                    InteractionType = "POS Transaction",
+                    Channel = "In-Store",
+                    Notes = $"POS Sale #{transaction.Id} for {transaction.TotalAmount:C}",
+                    PosTransactionId = transaction.Id
+                };
+                _context.InteractionHistories.Add(interaction);
 
                 foreach (var item in transaction.Items)
                 {

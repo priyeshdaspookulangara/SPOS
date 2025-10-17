@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Customer Relationship Management";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Select a category to manage:</p>
+
+<div class="list-group">
+    <a asp-action="Customers" class="list-group-item list-group-item-action">Customers</a>
+    <a asp-action="Leads" class="list-group-item list-group-item-action">Leads</a>
+    <a asp-action="Opportunities" class="list-group-item list-group-item-action">Opportunities</a>
+</div>

@@ -11,6 +11,23 @@ public class ApplicationDbContext : IdentityDbContext
     {
     }
 
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<Relationship>()
+            .HasOne(r => r.ParentCustomer)
+            .WithMany(c => c.ChildRelationships)
+            .HasForeignKey(r => r.ParentCustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Relationship>()
+            .HasOne(r => r.ChildCustomer)
+            .WithMany(c => c.ParentRelationships)
+            .HasForeignKey(r => r.ChildCustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+
     public DbSet<Vendor> Vendors { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Material> Materials { get; set; }
@@ -38,4 +55,12 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<PosTransaction> PosTransactions { get; set; }
     public DbSet<PosTransactionItem> PosTransactionItems { get; set; }
     public DbSet<PaymentMethod> PaymentMethods { get; set; }
+
+    // CRM Entities
+    public DbSet<Address> Addresses { get; set; }
+    public DbSet<Contact> Contacts { get; set; }
+    public DbSet<InteractionHistory> InteractionHistories { get; set; }
+    public DbSet<Lead> Leads { get; set; }
+    public DbSet<Opportunity> Opportunities { get; set; }
+    public DbSet<Relationship> Relationships { get; set; }
 }

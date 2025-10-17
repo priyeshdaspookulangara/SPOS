@@ -60,6 +60,17 @@ namespace Web.Controllers
                 salesOrder.OrderDate = DateTime.Now;
 
                 _context.Add(salesOrder);
+
+                var interaction = new InteractionHistory
+                {
+                    CustomerId = salesOrder.CustomerId,
+                    InteractionDate = DateTime.Now,
+                    InteractionType = "Sales Order",
+                    Channel = "Web",
+                    Notes = $"Sales Order #{salesOrder.Id} created for {salesOrder.TotalAmount:C}"
+                };
+                _context.InteractionHistories.Add(interaction);
+
                 await _context.SaveChangesAsync();
                 return Ok();
             }
