@@ -1,7 +1,4 @@
 using Infrastructure.Data;
-using Core.Services;
-using Infrastructure.Data;
-using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,8 +13,6 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
-
-builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 var app = builder.Build();
 
@@ -46,7 +41,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-// Apply migrations and seed data
+// Apply migrations
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -54,31 +49,11 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
-        // Seed Chart of Accounts
-        if (!context.ChartOfAccounts.Any())
-        {
-            context.ChartOfAccounts.AddRange(
-                new Core.Entities.ChartOfAccounts { AccountNumber = "101000", Description = "Cash", AccountType = "Asset" },
-                new Core.Entities.ChartOfAccounts { AccountNumber = "120000", Description = "Accounts Receivable", AccountType = "Asset" },
-                new Core.Entities.ChartOfAccounts { AccountNumber = "400000", Description = "Sales Revenue", AccountType = "Revenue" },
-                new Core.Entities.ChartOfAccounts { AccountNumber = "140000", Description = "Inventory", AccountType = "Asset" },
-                new Core.Entities.ChartOfAccounts { AccountNumber = "199999", Description = "GR/IR Clearing", AccountType = "Liability" }
-            );
-            context.SaveChanges();
-        }
-        if (!context.PaymentMethods.Any())
-        {
-            var cashAccount = context.ChartOfAccounts.First(a => a.AccountNumber == "101000");
-            context.PaymentMethods.AddRange(
-                new Core.Entities.PaymentMethod { Name = "Cash", GlAccountId = cashAccount.Id }
-            );
-            context.SaveChanges();
-        }
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+        logger.LogError(ex, "An error occurred while migrating the database.");
     }
 }
 

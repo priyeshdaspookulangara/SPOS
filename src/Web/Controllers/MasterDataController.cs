@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Web.Controllers
 {
-    [Authorize] // Secure the controller
+    [Authorize]
     public class MasterDataController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -97,6 +97,84 @@ namespace Web.Controllers
             _context.Vendors.Remove(vendor);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Vendors));
+        }
+
+        // Customer Actions
+        public async Task<IActionResult> Customers()
+        {
+            return View(await _context.Customers.ToListAsync());
+        }
+
+        public IActionResult CreateCustomer() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCustomer([Bind("Name,Address,City,PostalCode,Country,PhoneNumber,Email")] Customer customer)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(customer);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Customers));
+            }
+            return View(customer);
+        }
+
+        public async Task<IActionResult> EditCustomer(int? id)
+        {
+            if (id == null) return NotFound();
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer == null) return NotFound();
+            return View(customer);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCustomer(int id, [Bind("Id,Name,Address,City,PostalCode,Country,PhoneNumber,Email")] Customer customer)
+        {
+            if (id != customer.Id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(customer);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Customers.Any(e => e.Id == customer.Id)) return NotFound();
+                    else throw;
+                }
+                return RedirectToAction(nameof(Customers));
+            }
+            return View(customer);
+        }
+
+        public async Task<IActionResult> DetailsCustomer(int? id)
+        {
+            if (id == null) return NotFound();
+            var customer = await _context.Customers.FirstOrDefaultAsync(m => m.Id == id);
+            if (customer == null) return NotFound();
+            return View(customer);
+        }
+
+        public async Task<IActionResult> DeleteCustomer(int? id)
+        {
+            if (id == null) return NotFound();
+            var customer = await _context.Customers.FirstOrDefaultAsync(m => m.Id == id);
+            if (customer == null) return NotFound();
+            return View(customer);
+        }
+
+        [HttpPost, ActionName("DeleteCustomer")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCustomerConfirmed(int id)
+        {
+            var customer = await _context.Customers.FindAsync(id);
+            _context.Customers.Remove(customer);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Customers));
         }
 
         // Material Actions
